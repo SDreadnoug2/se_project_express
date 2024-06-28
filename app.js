@@ -22,8 +22,3 @@ app.use("/", require("./routes/index"));
 app.listen(PORT, () => {
   console.log(`server runing on ${PORT}`);
 });
-
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send({ message: "Internal Server Error" });
-});

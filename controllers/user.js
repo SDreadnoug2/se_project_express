@@ -6,7 +6,7 @@ module.exports.getUsers = (req, res) => {
     .then((users) => res.send({ data: users }))
     .catch((err) => {
       console.error(err);
-      res.status(500).send({ message: "Internal Server Error" });
+      return res.status(500).send({ message: "Internal Server Error" });
     });
 };
 
@@ -18,11 +18,11 @@ module.exports.getUser = (req, res) => {
       console.error(err);
       if (err.message === "NotFound") {
         return res.status(404).send({ message: "User not found" });
-      } else if (err.kind === "ObjectId") {
-        // Ensure invalid ObjectId is handled
+      }
+      if (err.kind === "ObjectId") {
         return res.status(400).send({ message: "Invalid User ID" });
       }
-      res.status(500).send({ message: "Internal Server Error" });
+      return res.status(500).send({ message: "Internal Server Error" });
     });
 };
 
@@ -33,9 +33,8 @@ module.exports.createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        // Handle validation error properly
         return res.status(400).send({ message: "Invalid data" });
       }
-      res.status(500).send({ message: "Internal Server Error" });
+      return res.status(500).send({ message: "Internal Server Error" });
     });
 };

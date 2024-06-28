@@ -5,7 +5,7 @@ module.exports.getItems = (req, res) => {
     .then((items) => res.send({ data: items }))
     .catch((err) => {
       console.error(err);
-      res.status(500).send({ message: "Internal Server Error" });
+      return res.status(500).send({ message: "Internal Server Error" });
     });
 };
 
@@ -18,11 +18,11 @@ module.exports.deleteItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.message === "NotFound") {
-        res.status(404).send({ message: "Item ID not found" });
+        return res.status(404).send({ message: "Item ID not found" });
       } else if (err.kind === "ObjectId") {
         return res.status(400).send({ message: "Invalid Item ID" });
       } else {
-        res.status(500).send({ message: "Internal Server Error" });
+        return res.status(500).send({ message: "Internal Server Error" });
       }
     });
 };
@@ -35,9 +35,9 @@ module.exports.createItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        res.status(400).send({ message: "Invalid data" });
+        return res.status(400).send({ message: "Invalid data" });
       } else {
-        res.status(500).send({ message: "Internal Server Error" });
+        return res.status(500).send({ message: "Internal Server Error" });
       }
     });
 };
@@ -53,12 +53,12 @@ module.exports.likeItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.message === "NotFound") {
-        res.status(404).send({ message: "Item ID not found" });
+        return res.status(404).send({ message: "Item ID not found" });
       } else if (err.kind === "ObjectId") {
         // Ensure invalid ObjectId is handled
         return res.status(400).send({ message: "Invalid Item ID" });
       } else {
-        res.status(500).send({ message: "Internal Server Error" });
+        return res.status(500).send({ message: "Internal Server Error" });
       }
     });
 };
@@ -79,7 +79,7 @@ module.exports.dislikeItem = (req, res) => {
         // Ensure invalid ObjectId is handled
         return res.status(400).send({ message: "Invalid Item ID" });
       } else {
-        res.status(500).send({ message: "Internal Server Error" });
+        return res.status(500).send({ message: "Internal Server Error" });
       }
     });
 };

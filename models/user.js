@@ -1,5 +1,6 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
+const mongoose = require("mongoose");
+const validator = require("validator");
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -15,7 +16,7 @@ const userSchema = new mongoose.Schema({
       message: "Please enter a valid URL.",
     },
   },
-})
+});
 
-const user = mongoose.model('user', userSchema);
+const user = mongoose.model("user", userSchema);
 module.exports = user;
