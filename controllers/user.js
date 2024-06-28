@@ -1,12 +1,14 @@
 // user controller
 const User = require("../models/user");
-
+const errors = require("../utils/errors");
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
     .catch((err) => {
       console.error(err);
-      return res.status(500).send({ message: "Internal Server Error" });
+      return res
+        .status(errors.BAD_REQUEST)
+        .send({ message: "Internal Server Error" });
     });
 };
 
@@ -17,12 +19,16 @@ module.exports.getUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.message === "NotFound") {
-        return res.status(404).send({ message: "User not found" });
+        return res.status(errors.NOT_FOUND).send({ message: "User not found" });
       }
       if (err.kind === "ObjectId") {
-        return res.status(400).send({ message: "Invalid User ID" });
+        return res
+          .status(errors.BAD_REQUEST)
+          .send({ message: "Invalid User ID" });
       }
-      return res.status(500).send({ message: "Internal Server Error" });
+      return res
+        .status(errors.BAD_REQUEST)
+        .send({ message: "Internal Server Error" });
     });
 };
 
@@ -33,8 +39,10 @@ module.exports.createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: "Invalid data" });
+        return res.status(errors.BAD_REQUEST).send({ message: "Invalid data" });
       }
-      return res.status(500).send({ message: "Internal Server Error" });
+      return res
+        .status(errors.BAD_REQUEST)
+        .send({ message: "Internal Server Error" });
     });
 };

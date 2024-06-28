@@ -1,11 +1,13 @@
 const Item = require("../models/clothingItem");
-
+const errors = require("../utils/errors");
 module.exports.getItems = (req, res) => {
   Item.find({})
     .then((items) => res.send({ data: items }))
     .catch((err) => {
       console.error(err);
-      return res.status(500).send({ message: "Internal Server Error" });
+      return res
+        .status(errors.SERVER_ERROR)
+        .send({ message: "Internal Server Error" });
     });
 };
 
@@ -18,12 +20,18 @@ module.exports.deleteItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.message === "NotFound") {
-        return res.status(404).send({ message: "Item ID not found" });
+        return res
+          .status(errors.NOT_FOUND)
+          .send({ message: "Item ID not found" });
       }
       if (err.kind === "ObjectId") {
-        return res.status(400).send({ message: "Invalid Item ID" });
+        return res
+          .status(errors.BAD_REQUEST)
+          .send({ message: "Invalid Item ID" });
       }
-      return res.status(500).send({ message: "Internal Server Error" });
+      return res
+        .status(errors.SERVER_ERROR)
+        .send({ message: "Internal Server Error" });
     });
 };
 
@@ -35,9 +43,11 @@ module.exports.createItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: "Invalid data" });
+        return res.status(errors.BAD_REQUEST).send({ message: "Invalid data" });
       }
-      return res.status(500).send({ message: "Internal Server Error" });
+      return res
+        .status(errors.SERVER_ERROR)
+        .send({ message: "Internal Server Error" });
     });
 };
 
@@ -52,13 +62,18 @@ module.exports.likeItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.message === "NotFound") {
-        return res.status(404).send({ message: "Item ID not found" });
+        return res
+          .status(errors.NOT_FOUND)
+          .send({ message: "Item ID not found" });
       }
       if (err.kind === "ObjectId") {
-        // Ensure invalid ObjectId is handled
-        return res.status(400).send({ message: "Invalid Item ID" });
+        return res
+          .status(errors.BAD_REQUEST)
+          .send({ message: "Invalid Item ID" });
       }
-      return res.status(500).send({ message: "Internal Server Error" });
+      return res
+        .status(errors.SERVER_ERROR)
+        .send({ message: "Internal Server Error" });
     });
 };
 
@@ -73,12 +88,18 @@ module.exports.dislikeItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.message === "NotFound") {
-        res.status(404).send({ message: "Item ID not found" });
+        return res
+          .status(errors.NOT_FOUND)
+          .send({ message: "Item ID not found" });
       }
       if (err.kind === "ObjectId") {
         // Ensure invalid ObjectId is handled
-        return res.status(400).send({ message: "Invalid Item ID" });
+        return res
+          .status(errors.BAD_REQUEST)
+          .send({ message: "Invalid Item ID" });
       }
-      return res.status(500).send({ message: "Internal Server Error" });
+      return res
+        .status(errors.SERVER_ERROR)
+        .send({ message: "Internal Server Error" });
     });
 };
