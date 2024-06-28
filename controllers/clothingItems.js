@@ -19,11 +19,11 @@ module.exports.deleteItem = (req, res) => {
       console.error(err);
       if (err.message === "NotFound") {
         return res.status(404).send({ message: "Item ID not found" });
-      } else if (err.kind === "ObjectId") {
-        return res.status(400).send({ message: "Invalid Item ID" });
-      } else {
-        return res.status(500).send({ message: "Internal Server Error" });
       }
+      if (err.kind === "ObjectId") {
+        return res.status(400).send({ message: "Invalid Item ID" });
+      }
+      return res.status(500).send({ message: "Internal Server Error" });
     });
 };
 
@@ -36,9 +36,8 @@ module.exports.createItem = (req, res) => {
       console.error(err);
       if (err.name === "ValidationError") {
         return res.status(400).send({ message: "Invalid data" });
-      } else {
-        return res.status(500).send({ message: "Internal Server Error" });
       }
+      return res.status(500).send({ message: "Internal Server Error" });
     });
 };
 
@@ -54,12 +53,12 @@ module.exports.likeItem = (req, res) => {
       console.error(err);
       if (err.message === "NotFound") {
         return res.status(404).send({ message: "Item ID not found" });
-      } else if (err.kind === "ObjectId") {
+      }
+      if (err.kind === "ObjectId") {
         // Ensure invalid ObjectId is handled
         return res.status(400).send({ message: "Invalid Item ID" });
-      } else {
-        return res.status(500).send({ message: "Internal Server Error" });
       }
+      return res.status(500).send({ message: "Internal Server Error" });
     });
 };
 
@@ -75,11 +74,11 @@ module.exports.dislikeItem = (req, res) => {
       console.error(err);
       if (err.message === "NotFound") {
         res.status(404).send({ message: "Item ID not found" });
-      } else if (err.kind === "ObjectId") {
+      }
+      if (err.kind === "ObjectId") {
         // Ensure invalid ObjectId is handled
         return res.status(400).send({ message: "Invalid Item ID" });
-      } else {
-        return res.status(500).send({ message: "Internal Server Error" });
       }
+      return res.status(500).send({ message: "Internal Server Error" });
     });
 };
