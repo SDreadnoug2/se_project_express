@@ -19,11 +19,6 @@ app.use((req, res, next) => {
 
 app.use("/", require("./routes/index"));
 
-app.use((err, res) => {
-  console.error("Global error handler:", err.stack);
-  res.status(500).send({ message: "Internal Server Error" });
-});
-
 app.listen(PORT, () => {
   console.log(`server runing on ${PORT}`);
 });
