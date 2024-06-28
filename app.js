@@ -11,9 +11,13 @@ mongoose.connect('mongodb://127.0.0.1:27017/wtwr_db');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
 app.use('/', require('./routes/index'));
 
 app.listen(PORT, () => {
   console.log(`server runing on ${PORT}`);
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send({ message: 'Internal Server Error' });
 });

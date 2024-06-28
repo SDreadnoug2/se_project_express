@@ -13,9 +13,7 @@ module.exports.getUsers = (req, res) => {
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
     .orFail()
-    .then(user => {
-      res.send({ data: user });
-    })
+    .then(user => res.send({ data: user }))
     .catch(err => {
       console.error(err);
       if (err.kind === 'ObjectId') {
