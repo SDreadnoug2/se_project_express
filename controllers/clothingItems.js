@@ -1,5 +1,6 @@
 const Item = require("../models/clothingItem");
 const errors = require("../utils/errors");
+
 module.exports.getItems = (req, res) => {
   Item.find({})
     .then((items) => res.send({ data: items }))

@@ -1,6 +1,7 @@
 // user controller
 const User = require("../models/user");
 const errors = require("../utils/errors");
+
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
