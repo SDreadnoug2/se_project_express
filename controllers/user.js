@@ -40,14 +40,16 @@ module.exports.createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
   User.findOne({email}).then((user) => {
     if(user){
-    throw new Error("UserExists");
+      const error = new Error("UserExists");
+      error.name = "UserExists";
+      throw error;
   }
   return bcrypt.hash(password, 10);
 })
 .then((hashword) => {
   return User.create({ name, avatar, email, password: hashword });
 })
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send({ name: user.name, avatar: user.avatar, email: user.email }))
     .catch((err) => {
       console.error(err);
       if (err.name === "UserExists") {
@@ -64,6 +66,9 @@ module.exports.createUser = (req, res) => {
 
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(errors.BAD_REQUEST).send({ message: "Please fill out all fields." });
+  }
   return User.findUserByCredentials(email, password)
       .then((user) => {
         const token = jwt.sign({id: user._id}, JWT_SECRET, {expiresIn: '7d'});

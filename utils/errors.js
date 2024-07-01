@@ -2,6 +2,6 @@ module.exports = {
   BAD_REQUEST: 400,
   NOT_FOUND: 404,
   SERVER_ERROR: 500,
-  USER_EXISTS: 1100,
+  USER_EXISTS: 409,
   AUTH_ERROR: 401,
 };

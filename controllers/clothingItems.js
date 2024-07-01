@@ -13,11 +13,26 @@ module.exports.getItems = (req, res) => {
 };
 
 module.exports.deleteItem = (req, res) => {
-  Item.findByIdAndRemove(req.params.itemId)
+  const { itemId } = req.params;
+  const { _id: userId } = req.user;
+  Item.findById(itemId)
     .orFail(new Error("NotFound"))
-    .then((item) =>
-      res.send({ message: `Item ID: ${item._id} deleted successfully` })
-    )
+    .then((item) => {
+      if (item.owner.equals(userId)) {
+        return Item.findByIdAndRemove(itemId)
+          .then(() => res.send({ message: `Item ID: ${itemId} deleted successfully` }))
+          .catch((err) => {
+            console.error(err);
+            return res
+              .status(errors.SERVER_ERROR)
+              .send({ message: "Internal Server Error" });
+          });
+      } else {
+        return res
+          .status(403)
+          .send({ message: "You do not have permission to delete this item" });
+      }
+    })
     .catch((err) => {
       console.error(err);
       if (err.message === "NotFound") {
@@ -35,7 +50,6 @@ module.exports.deleteItem = (req, res) => {
         .send({ message: "Internal Server Error" });
     });
 };
-
 module.exports.createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
