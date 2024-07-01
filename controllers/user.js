@@ -1,6 +1,9 @@
 // user controller
 const User = require("../models/user");
+const bcrypt = require("bcryptjs")
 const errors = require("../utils/errors");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../utils/config");
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -34,11 +37,22 @@ module.exports.getUser = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, avatar } = req.body;
-  User.create({ name, avatar })
+  const { name, avatar, email, password } = req.body;
+  User.findOne({email}).then((user) => {
+    if(user){
+    throw new Error("UserExists");
+  }
+  return bcrypt.hash(password, 10);
+})
+.then((hashword) => {
+  return User.create({ name, avatar, email, password: hashword });
+})
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       console.error(err);
+      if (err.name === "UserExists") {
+        return res.status(errors.USER_EXISTS).send({message: "This email is already in use."})
+      }
       if (err.name === "ValidationError") {
         return res.status(errors.BAD_REQUEST).send({ message: "Invalid data" });
       }
@@ -47,3 +61,29 @@ module.exports.createUser = (req, res) => {
         .send({ message: "Internal Server Error" });
     });
 };
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+      .then((user) => {
+        const token = jwt.sign({id: user._id}, JWT_SECRET, {expiresIn: '7d'});
+        res.send({token});
+      })
+      .catch((err) => {
+          res.status(errors.AUTH_ERROR).send({ message: err.message });
+      });
+  };
+
+  module.exports.getCurrentUser = (req, res) => {
+    User.findById(req.user._id)
+      .then((user) => {
+        if (!user) {
+          return res.status(errors.NOT_FOUND).send({ message: 'User not found' });
+        }
+        res.send({ data: user });
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(errors.INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error' });
+      });
+  };
