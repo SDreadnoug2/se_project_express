@@ -1,8 +1,8 @@
 // user controller
-const User = require("../models/user");
-const bcrypt = require("bcryptjs");
-const errors = require("../utils/errors");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const User = require("../models/user");
+const errors = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
 module.exports.getUsers = (req, res) => {
@@ -52,15 +52,8 @@ module.exports.createUser = (req, res) => {
       }
       return bcrypt.hash(password, 10);
     })
-    .then((hashword) => {
-      return User.create({ name, avatar, email, password: hashword });
-    })
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        expiresIn: "7d",
-      });
-      res.send({ name: user.name, avatar: user.avatar, email: user.email });
-    })
+    .then((hashword) => User.create({ name, avatar, email, password: hashword }))
+    .then((user) => res.send({ name: user.name, avatar: user.avatar, email: user.email }))
     .catch((err) => {
       console.error(err);
       if (err.name === "UserExists") {
@@ -127,6 +120,6 @@ module.exports.updateUser = (req, res) => {
     .catch((err) => {
       res
         .status(errors.SERVER_ERROR)
-        .send({ message: "Internal Server Error" });
+        .send({ message: "Internal Server Error:", err });
     });
 };

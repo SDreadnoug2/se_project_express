@@ -13,6 +13,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/", require("./routes/index"));
 
+const authMiddleware = require("./middleware/auth");
+
+// Use the authentication middleware
+app.use(authMiddleware);
+
 app.listen(PORT, () => {
   console.log(`server runing on ${PORT}`);
 });
+

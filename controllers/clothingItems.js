@@ -29,11 +29,11 @@ module.exports.deleteItem = (req, res) => {
               .status(errors.SERVER_ERROR)
               .send({ message: "Internal Server Error" });
           });
-      } else {
+      }
         return res.status(403).send({
           message: "You do not have permission to delete this item",
         });
-      }
+      
     })
     .catch((err) => {
       console.error(err);
