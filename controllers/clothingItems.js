@@ -14,13 +14,15 @@ module.exports.getItems = (req, res) => {
 
 module.exports.deleteItem = (req, res) => {
   const { itemId } = req.params;
-  const { _id: userId } = req.user;
+  const userId = req.user.id;
   Item.findById(itemId)
     .orFail(new Error("NotFound"))
     .then((item) => {
       if (item.owner.equals(userId)) {
         return Item.findByIdAndRemove(itemId)
-          .then(() => res.send({ message: `Item ID: ${itemId} deleted successfully` }))
+          .then(() =>
+            res.send({ message: `Item ID: ${itemId} deleted successfully` })
+          )
           .catch((err) => {
             console.error(err);
             return res
@@ -28,9 +30,9 @@ module.exports.deleteItem = (req, res) => {
               .send({ message: "Internal Server Error" });
           });
       } else {
-        return res
-          .status(403)
-          .send({ message: "You do not have permission to delete this item" });
+        return res.status(403).send({
+          message: "You do not have permission to delete this item",
+        });
       }
     })
     .catch((err) => {
@@ -52,7 +54,7 @@ module.exports.deleteItem = (req, res) => {
 };
 module.exports.createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
-  const owner = req.user._id;
+  const owner = req.user.id;
   Item.create({ name, weather, imageUrl, owner })
     .then((item) => res.send({ data: item }))
     .catch((err) => {
@@ -69,11 +71,15 @@ module.exports.createItem = (req, res) => {
 module.exports.likeItem = (req, res) => {
   Item.findByIdAndUpdate(
     req.params.itemId,
-    { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
+    { $addToSet: { likes: req.user.id } },
     { new: true }
   )
-    .orFail(new Error("NotFound"))
-    .then((item) => res.send({ data: item }))
+    .then((item) => {
+      if (!item) {
+        throw new Error("NotFound");
+      }
+      res.send({ data: item });
+    })
     .catch((err) => {
       console.error(err);
       if (err.message === "NotFound") {
@@ -95,7 +101,7 @@ module.exports.likeItem = (req, res) => {
 module.exports.dislikeItem = (req, res) => {
   Item.findByIdAndUpdate(
     req.params.itemId,
-    { $pull: { likes: req.user._id } }, // remove _id from the array
+    { $pull: { likes: req.user.id } }, // remove _id from the array
     { new: true }
   )
     .orFail(new Error("NotFound"))

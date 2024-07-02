@@ -3,12 +3,11 @@ const router = express.Router();
 const userRouter = require("./users");
 const itemRouter = require("./clothingItems");
 const errors = require("../utils/errors");
-const auth = require("../middleware/auth")
-const {login, createUser } = require('../controllers/user');
+const auth = require("../middleware/auth");
+const { login, createUser } = require("../controllers/user");
 
-
-router.post('/signin', login);
-router.post('/signup', createUser);
+router.post("/signin", login);
+router.post("/signup", createUser);
 
 router.use("/users", auth, userRouter);
 
