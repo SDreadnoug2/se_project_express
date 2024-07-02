@@ -5,37 +5,6 @@ const User = require("../models/user");
 const errors = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
-module.exports.getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.send({ data: users }))
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(errors.BAD_REQUEST)
-        .send({ message: "Internal Server Error" });
-    });
-};
-
-module.exports.getUser = (req, res) => {
-  User.findById(req.params.userId)
-    .orFail(new Error("NotFound"))
-    .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      console.error(err);
-      if (err.message === "NotFound") {
-        return res.status(errors.NOT_FOUND).send({ message: "User not found" });
-      }
-      if (err.kind === "ObjectId") {
-        return res
-          .status(errors.BAD_REQUEST)
-          .send({ message: "Invalid User ID" });
-      }
-      return res
-        .status(errors.BAD_REQUEST)
-        .send({ message: "Internal Server Error" });
-    });
-};
-
 module.exports.createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
   if (!email || !password) {
@@ -43,7 +12,7 @@ module.exports.createUser = (req, res) => {
       .status(errors.BAD_REQUEST)
       .send({ message: "Please fill out all fields." });
   }
-  User.findOne({ email })
+  return User.findOne({ email })
     .then((user) => {
       if (user) {
         const error = new Error("UserExists");
@@ -55,17 +24,16 @@ module.exports.createUser = (req, res) => {
     .then((hashword) => User.create({ name, avatar, email, password: hashword }))
     .then((user) => res.send({ name: user.name, avatar: user.avatar, email: user.email }))
     .catch((err) => {
-      console.error(err);
       if (err.name === "UserExists") {
         return res
-          .status(errors.BAD_REQUEST)
+          .status(errors.USER_EXISTS)
           .send({ message: "This email is already in use." });
       }
       if (err.name === "ValidationError") {
         return res.status(errors.BAD_REQUEST).send({ message: "Invalid data" });
       }
       return res
-        .status(errors.BAD_REQUEST)
+        .status(errors.SERVER_ERROR)
         .send({ message: "Internal Server Error!" });
     });
 };
@@ -83,15 +51,16 @@ module.exports.login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
-      res.status(errors.AUTH_ERROR).send({ message: err.message });
+      if (err.message === "Incorrect email or password") {
+        return res.status(errors.AUTH_ERROR).send({message: "Incorrect email or password"})
+     }
+      return res.status(errors.SERVER_ERROR).send({ message: "Server Error!" });
     });
 };
 
 module.exports.getCurrentUser = (req, res) => {
-  console.log("req.user:", req.user);
   User.findById(req.user.id)
     .then((user) => {
-      console.log({ data: user });
       if (!user) {
         return res.status(errors.NOT_FOUND).send({ message: "User not found" });
       }
@@ -118,8 +87,11 @@ module.exports.updateUser = (req, res) => {
       return res.send({ data: updatedUser });
     })
     .catch((err) => {
-      res
+      if (err.name === 'ValidationError' ) {
+        return res.status(errors.BAD_REQUEST).send({messsage: "Validation Error"});
+  }
+      return res
         .status(errors.SERVER_ERROR)
-        .send({ message: "Internal Server Error:", err });
+        .send({ message: "Internal Server Error"});
     });
 };

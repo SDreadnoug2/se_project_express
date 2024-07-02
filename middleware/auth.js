@@ -17,7 +17,7 @@ module.exports = (req, res, next) => {
   } catch (err) {
     return res
       .status(errors.AUTH_ERROR)
-      .send({ message: "Authorization required:", err });
+      .send({ message: "Authorization required"});
   }
   req.user = payload;
   console.log("User attached to req:", req.user);

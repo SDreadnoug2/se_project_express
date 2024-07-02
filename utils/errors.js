@@ -4,4 +4,5 @@ module.exports = {
   SERVER_ERROR: 500,
   USER_EXISTS: 409,
   AUTH_ERROR: 401,
+  NO_PERMISSION: 403
 };

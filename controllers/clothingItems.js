@@ -30,10 +30,10 @@ module.exports.deleteItem = (req, res) => {
               .send({ message: "Internal Server Error" });
           });
       }
-        return res.status(403).send({
+        return res.status(errors.NO_PERMISSION).send({
           message: "You do not have permission to delete this item",
         });
-      
+
     })
     .catch((err) => {
       console.error(err);
@@ -101,7 +101,7 @@ module.exports.likeItem = (req, res) => {
 module.exports.dislikeItem = (req, res) => {
   Item.findByIdAndUpdate(
     req.params.itemId,
-    { $pull: { likes: req.user.id } }, // remove _id from the array
+    { $pull: { likes: req.user.id } },
     { new: true }
   )
     .orFail(new Error("NotFound"))
@@ -114,7 +114,6 @@ module.exports.dislikeItem = (req, res) => {
           .send({ message: "Item ID not found" });
       }
       if (err.kind === "ObjectId") {
-        // Ensure invalid ObjectId is handled
         return res
           .status(errors.BAD_REQUEST)
           .send({ message: "Invalid Item ID" });
