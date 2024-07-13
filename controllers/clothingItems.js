@@ -56,7 +56,7 @@ module.exports.createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
   const owner = req.user.id;
   Item.create({ name, weather, imageUrl, owner })
-    .then((item) => res.send({ data: item }))
+    .then((item) => res.send({item}))
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
@@ -78,7 +78,7 @@ module.exports.likeItem = (req, res) => {
       if (!item) {
         throw new Error("NotFound");
       }
-      res.send({ data: item });
+      return res.send({ data: item });
     })
     .catch((err) => {
       console.error(err);

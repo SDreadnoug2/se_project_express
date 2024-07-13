@@ -48,7 +48,7 @@ module.exports.login = (req, res) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
-      res.send({ token });
+      res.send({ token, user});
     })
     .catch((err) => {
       if (err.message === "Incorrect email or password") {
