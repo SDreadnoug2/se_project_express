@@ -84,11 +84,12 @@ module.exports.updateUser = (req, res) => {
       if (!updatedUser) {
         return res.status(errors.NOT_FOUND).send({ message: "User not found" });
       }
-      return res.send({ data: updatedUser });
+      console.log(`user updated: ${updatedUser}`)
+      return res.send({ updatedUser });
     })
     .catch((err) => {
       if (err.name === 'ValidationError' ) {
-        return res.status(errors.BAD_REQUEST).send({messsage: "Validation Error"});
+        return res.status(errors.BAD_REQUEST).send(req.body);
   }
       return res
         .status(errors.SERVER_ERROR)
