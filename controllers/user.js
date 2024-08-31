@@ -4,46 +4,40 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const errors = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
+const { NotFoundError, BadRequest, ServerError, NoPermission } = require("../utils/errors");
 
-module.exports.createUser = (req, res) => {
+
+module.exports.createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
   if (!email || !password) {
-    return res
-      .status(errors.BAD_REQUEST)
-      .send({ message: "Please fill out all fields." });
+    next( new BadRequest('Please fill out all fields.'))
   }
   return User.findOne({ email })
     .then((user) => {
       if (user) {
-        const error = new Error("UserExists");
-        error.name = "UserExists";
-        throw error;
+        throw new BadRequest('User Exists')
       }
       return bcrypt.hash(password, 10);
     })
     .then((hashword) => User.create({ name, avatar, email, password: hashword }))
     .then((user) => res.send({ name: user.name, avatar: user.avatar, email: user.email }))
     .catch((err) => {
-      if (err.name === "UserExists") {
-        return res
-          .status(errors.USER_EXISTS)
-          .send({ message: "This email is already in use." });
+      if (err instanceof BadRequest) {
+        next(err)
       }
       if (err.name === "ValidationError") {
-        return res.status(errors.BAD_REQUEST).send({ message: "Invalid data" });
+        next(new BadRequest('Invalid Data.'))
       }
-      return res
-        .status(errors.SERVER_ERROR)
-        .send({ message: "Internal Server Error!" });
+      else {
+        next(err);
+      }
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res
-      .status(errors.BAD_REQUEST)
-      .send({ message: "Please fill out all fields." });
+    throw new BadRequest('Please fill out all fields.')
   }
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -52,47 +46,51 @@ module.exports.login = (req, res) => {
     })
     .catch((err) => {
       if (err.message === "Incorrect email or password") {
-        return res.status(errors.AUTH_ERROR).send({message: "Incorrect email or password"})
+        next(new BadRequest('Incorrect email or password'))
      }
-      return res.status(errors.SERVER_ERROR).send({ message: "Server Error!" });
+      else {
+        next(err);
+      }
     });
 };
 
-module.exports.getCurrentUser = (req, res) => {
+module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user.id)
     .then((user) => {
       if (!user) {
-        return res.status(errors.NOT_FOUND).send({ message: "User not found" });
+        throw new NotFoundError('no user found')
       }
 
       return res.send({ data: user });
     })
     .catch((err) => {
       console.error(err);
-      res
-        .status(errors.INTERNAL_SERVER_ERROR)
-        .send({ message: "Internal Server Error" });
+      if(err instanceof NotFoundError){
+        next(err);
+      }
+      else{
+        next(err)
+      }
     });
 };
 
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   User.findByIdAndUpdate(req.user.id, req.body, {
     new: true,
     runValidators: true,
   })
     .then((updatedUser) => {
       if (!updatedUser) {
-        return res.status(errors.NOT_FOUND).send({ message: "User not found" });
+        throw new NotFoundError('Updated User not found!')
       }
       console.log(`user updated: ${updatedUser}`)
       return res.send({ updatedUser });
     })
     .catch((err) => {
       if (err.name === 'ValidationError' ) {
-        return res.status(errors.BAD_REQUEST).send(req.body);
+        next(new NoPermission('Validation Error'))
+  } else {
+    next(err);
   }
-      return res
-        .status(errors.SERVER_ERROR)
-        .send({ message: "Internal Server Error"});
     });
 };
