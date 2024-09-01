@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const helmet = require('helmet')
 const errorHandler = require('./middleware/error-handler')
+const { requestLogger, errorLogger } = require('./middleware/logger');
 const {errors} = require('celebrate');
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -13,8 +14,9 @@ app.use(cors());
 app.use(helmet())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(requestLogger);
 app.use("/", require("./routes/index"));
+app.use(errorLogger);
 app.use(errors());
 app.use(errorHandler);
 app.listen(PORT, () => {
