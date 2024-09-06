@@ -26,3 +26,6 @@ Users can create, like, and dislike various clothing items. The application stor
 
 - `npm run start` — to launch the server
 - `npm run dev` — to launch the server with the hot reload feature (nodemon)
+
+## LINKS ##
+https://www.wtwrmil.crabdance.com/
