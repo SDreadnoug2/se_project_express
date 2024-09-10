@@ -1,6 +1,8 @@
 const Item = require("../models/clothingItem");
-const errors = require("../utils/errors");
-const { NotFoundError, BadRequest, ServerError, NoPermission } = require("../utils/errors");
+const {NotFoundError} = require("../utils/NotFoundError");
+const {BadRequest} = require("../utils/BadRequestError");
+const {ServerError} = require("../utils/ServerError");
+const {NoPermission} = require("../utils/NoPermsError");
 
 module.exports.getItems = (req, res, next) => {
   Item.find({})
@@ -43,7 +45,7 @@ module.exports.createItem = (req, res, next) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        next(new AuthError('Unable to Validate'))
+        next(new BadRequest('Unable to Validate'))
       }
       else {
         next(err);
@@ -89,7 +91,7 @@ module.exports.dislikeItem = (req, res, next) => {
     .then((item) => res.send({ data: item }))
     .catch((err) => {
       console.error(err);
-      if (err instanceof "NotFound") {
+      if (err instanceof NotFoundError) {
         next(err)
       }
       if (err.kind === "ObjectId") {

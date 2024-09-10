@@ -18,8 +18,17 @@ const clothingItemValidation = celebrate({
     imageUrl: Joi.string().required().custom(validateURL).messages({
       'string.empty': 'The "imageUrl" field must be filled in',
       'string.uri': 'The "imageUrl" field must be a valid url.',
-    })
+    }),
+    weather: Joi.string().valid('hot', 'warm', 'cold').required(),
   })
+});
+
+
+const updateUserValidation = celebrate({
+  body: Joi.object({
+    name: Joi.string().min(2).max(30),
+    avatar: Joi.string().uri(),
+  }),
 });
 
 const createUserValidation = celebrate({
@@ -40,7 +49,7 @@ const loginValidation = celebrate({
 
 const validateId = celebrate({
   params: Joi.object().keys({
-    id: Joi.string().hex().length(24).required(),
+    itemId: Joi.string().hex().length(24).required(),
   }),
 });
 
@@ -49,4 +58,5 @@ module.exports = {
   createUserValidation,
   loginValidation,
   validateId,
+  updateUserValidation
 };

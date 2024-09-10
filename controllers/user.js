@@ -2,10 +2,11 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
-const errors = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
-const { NotFoundError, BadRequest, ServerError, NoPermission } = require("../utils/errors");
-
+const {NotFoundError} = require("../utils/NotFoundError");
+const {BadRequest} = require("../utils/BadRequestError");
+const {UserExists} = require("../utils/UserExistsError");
+const {AuthError} = require("../utils/AuthError");
 
 module.exports.createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
@@ -15,7 +16,7 @@ module.exports.createUser = (req, res, next) => {
   return User.findOne({ email })
     .then((user) => {
       if (user) {
-        throw new BadRequest('User Exists')
+        throw new UserExists('User Exists')
       }
       return bcrypt.hash(password, 10);
     })
@@ -42,11 +43,11 @@ module.exports.login = (req, res, next) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
-      res.send({ token, user});
+      res.send({token});
     })
     .catch((err) => {
       if (err.message === "Incorrect email or password") {
-        next(new BadRequest('Incorrect email or password'))
+        next(new AuthError('Incorrect email or password'))
      }
       else {
         next(err);
@@ -88,7 +89,7 @@ module.exports.updateUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError' ) {
-        next(new NoPermission('Validation Error'))
+        next(new BadRequest('Validation Error'))
   } else {
     next(err);
   }
