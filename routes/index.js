@@ -4,7 +4,8 @@ const itemRouter = require("./clothingItems");
 const auth = require("../middleware/auth");
 const { login, createUser } = require("../controllers/user");
 const {createUserValidation, loginValidation} = require('../middleware/validation');
-const NotFoundError = require("../utils/NotFoundError");
+const {NotFoundError} = require("../utils/NotFoundError");
+
 const router = express.Router();
 router.post("/signin", loginValidation, login);
 router.post("/signup", createUserValidation, createUser);
